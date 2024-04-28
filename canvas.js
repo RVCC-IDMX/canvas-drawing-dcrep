@@ -29,26 +29,28 @@ window.addEventListener('load', () => {
 */
     const lineWidth = 10;
     const drawColor = 'blue';
-    let painting = false;
+    let painting = false, moved = false;
     let startX = 0, startY = 0;
 
     function startPosition(e) {
         painting = true;
+        // Set up drawing parameters & start position/move-status on mouse-down
         startX = e.clientX;
         startY = e.clientY;
-        // Set up drawing parameters & begin path on mouse-down
+
         ctx.lineWidth = lineWidth;
         ctx.lineCap = 'round';
         ctx.strokeStyle = drawColor;
-        ctx.beginPath();
-        ctx.moveTo(startX, startY);
+
+        moved = false;
     }
 
     function finishedPosition(e) {
         painting = false;
         // No movement since mouse-down?  Draw a circle/dot
-        if (startX === e.clientX && startY === e.clientY)
+        if (!moved)
         {
+            ctx.beginPath();            
             ctx.fillStyle = drawColor;
             ctx.arc(startX, startY, lineWidth / 2, 0, 2 * Math.PI, true);
             ctx.fill();
@@ -59,9 +61,16 @@ window.addEventListener('load', () => {
 
     function draw(e) {
         if (!painting) return;
-        // Draw to current mouse position from previous location
+        // Indicate movement so mouse-up doesn't draw a dot
+        moved = true;
+        // Draw a line from mouse-down position to current position
+        ctx.beginPath();
+        ctx.moveTo(startX, startY);
         ctx.lineTo(e.clientX, e.clientY);
-        ctx.stroke();        
+        ctx.stroke();
+        // Set start for next stroke to current position
+        startX = e.clientX;
+        startY = e.clientY;        
     }
 
     // Event Listeners
